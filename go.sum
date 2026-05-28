@@ -1,0 +1,6 @@
+go.jcbhmr.com/crossexec v1.1.1 h1:HFtTX7OeLFyIzOYu45eSVdmuIMBplrEbyDwe7wOXLUI=
+go.jcbhmr.com/crossexec v1.1.1/go.mod h1:5/RDQdtQIV8V0vfZT7y3Q9KVXyLRVg/9gP5fQAIZXj4=
+golang.org/toolchain v0.0.1-go1.26.3.linux-amd64 h1:LdHRR8AtYKtOQrWMnd5AbvhZMSVJ7HoO2wrqShPaLV8=
+golang.org/toolchain v0.0.1-go1.26.3.linux-amd64/go.mod h1:8wlg68NqwW7eMnI1aABk/C2pDYXj8mrMY4TyRfiLeS0=
+golang.org/x/sys v0.44.0 h1:ildZl3J4uzeKP07r2F++Op7E9B29JRUy+a27EibtBTQ=
+golang.org/x/sys v0.44.0/go.mod h1:4GL1E5IUh+htKOUEOaiffhrAeqysfVGipDYzABqnCmw=
