@@ -40,9 +40,11 @@ func main() {
 		}
 	}
 
+	log.Printf("dir=%v", dir)
+
 	argv0 := filepath.Join(dir, "bin", "go")
 	if runtime.GOOS == "windows" {
 		argv0 += ".exe"
 	}
-	crossexec.Exec(argv0, os.Args, os.Environ())
+	log.Fatal(crossexec.Exec(argv0, os.Args, os.Environ()))
 }
