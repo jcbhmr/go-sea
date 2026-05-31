@@ -1,0 +1,9 @@
+{
+    "gopls": {
+        "build.directoryFilters": [
+            "-**/node_modules",
+            "-go"
+        ]
+    },
+    "git.detectSubmodules": false
+}

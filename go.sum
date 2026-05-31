@@ -12,6 +12,8 @@ github.com/psanford/memfs v0.0.0-20210214183328-a001468d78ef h1:NKxTG6GVGbfMXc2m
 github.com/psanford/memfs v0.0.0-20210214183328-a001468d78ef/go.mod h1:tcaRap0jS3eifrEEllL6ZMd9dg8IlDpi2S1oARrQ+NI=
 github.com/stretchr/testify v1.7.1 h1:5TQK59W5E3v0r2duFAb7P95B6hEeOyEnHRa8MjYSMTY=
 github.com/stretchr/testify v1.7.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
+github.com/timpalpant/gzran v0.0.0-20201127163450-7b631e56f57b h1:BbST6DwxZOOs2SlOn0T4ueIEOzrFfs/0gZZLjbWrIoY=
+github.com/timpalpant/gzran v0.0.0-20201127163450-7b631e56f57b/go.mod h1:yTxMuBKYLrj6gYYtK3gK0ifBhjiBYtD3URZiNK7vBt0=
 github.com/yuin/goldmark v1.4.13/go.mod h1:6yULJ656Px+3vBD8DxQVa3kxgyrAnzto9xy5taEt/CY=
 go.jcbhmr.com/crossexec v1.1.1 h1:HFtTX7OeLFyIzOYu45eSVdmuIMBplrEbyDwe7wOXLUI=
 go.jcbhmr.com/crossexec v1.1.1/go.mod h1:5/RDQdtQIV8V0vfZT7y3Q9KVXyLRVg/9gP5fQAIZXj4=

@@ -6,8 +6,7 @@ toolchain go1.26.3
 
 tool (
 	go.jcbhmr.com.internal/go-sea/internal/cmd/build
-	go.jcbhmr.com.internal/go-sea/internal/cmd/build-go
-	go.jcbhmr.com.internal/go-sea/internal/cmd/generate-data
+	go.jcbhmr.com.internal/go-sea/internal/cmd/go-src-make
 )
 
 require (
@@ -18,6 +17,7 @@ require (
 
 require (
 	github.com/mattn/goveralls v0.0.12 // indirect
+	github.com/timpalpant/gzran v0.0.0-20201127163450-7b631e56f57b // indirect
 	golang.org/x/mod v0.10.0 // indirect
 	golang.org/x/sys v0.44.0 // indirect
 	golang.org/x/tools v0.8.0 // indirect
