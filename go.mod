@@ -6,7 +6,7 @@ toolchain go1.26.3
 
 tool (
 	go.jcbhmr.com.internal/go-sea/internal/cmd/build
-	go.jcbhmr.com.internal/go-sea/internal/cmd/go-src-make
+	go.jcbhmr.com.internal/go-sea/internal/cmd/makew
 )
 
 require (

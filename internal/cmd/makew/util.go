@@ -20,6 +20,35 @@ func regularExists(name string) (bool, error) {
 	return fi.Mode().IsRegular(), nil
 }
 
+func copyFile(dst, src string) (err error) {
+	srcFile, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		err = errors.Join(err, srcFile.Close())
+	}()
+
+	srcInfo, err := srcFile.Stat()
+	if err != nil {
+		return err
+	}
+
+	dstFile, err := os.OpenFile(dst, os.O_RDWR|os.O_CREATE|os.O_TRUNC, srcInfo.Mode()&fs.ModePerm)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		err = errors.Join(err, dstFile.Close())
+	}()
+
+	_, err = io.Copy(dstFile, srcFile)
+	if err != nil {
+		return &os.PathError{Op: "copyFile", Path: dst, Err: err}
+	}
+	return nil
+}
+
 func copyFSIgnoreExists(dir string, fsys fs.FS) error {
 	return fs.WalkDir(fsys, ".", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
