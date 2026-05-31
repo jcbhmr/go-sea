@@ -1,8 +1,11 @@
 # Go as a Single Executable Application
 
+🚚 `go` and `gofmt` packaged as standalone bundled binaries
+
+<div align=center>
 <table>
-<tr align=center><th>Before<th>After
-<tr align=center valign=top><td align=left>
+<tr><th>Before<th>After
+<tr valign=top><td>
 
 ```
 /usr/local/go
@@ -33,7 +36,7 @@
 └── VERSION
 ```
 
-<td align=left>
+<td>
 
 ```
 ~/.local/bin
@@ -42,63 +45,21 @@
 ```
 
 </table>
+</div>
 
 ## Installation
 
-- **Windows x86-64:** [`go.windows-amd64.zip`](#TODO)
-- **Linux x86-64:** [`go.linux-amd64.zip`](#TODO)
-- **Linux AArch64:** [`go.linux-arm64.zip`](#TODO)
-- **macOS AArch64:** [`go.darwin-arm64.zip`](#TODO)
-
-<dl>
-<div>
-<dt>Linux, macOS, and other *nix-like systems
-<dd>
-
-```sh
-unzip ./go.*.zip -d ~/.local/bin
-```
-
-<details><summary>Add <code>~/.local/bin</code> to your <code>PATH</code></summary>
-
-```sh
-echo 'PATH="$PATH:$HOME/.local/bin"' >> ~/.bashrc
-```
-
-</details>
-
-</div>
-<div>
-<dt>Windows
-<dd>
-
-```powershell
-Expand-Archive -Path ./go.*.zip -DestinationPath "$Env:LocalAppData/Programs"
-```
-
-<details><summary>Add <code>%LocalAppData%</code> to your <code>PATH</code></summary>
-
-```powershell
-$binDir = "$env:LocalAppData\Programs"
-$currentPath = [System.Environment]::GetEnvironmentVariable("Path", [System.EnvironmentVariableTarget]::User)
-$currentPathList = $currentPath -split ";"
-if ($currentPathList -notcontains $binDir) {
-    $newPath = if ([string]::IsNullOrWhiteSpace($currentPath)) {
-        $binDir
-    } else {
-        "$currentPath;$binDir"
-    }
-    [System.Environment]::SetEnvironmentVariable("Path", $newPath, [System.EnvironmentVariableTarget]::User)
-    Write-Host "$binDir added successfully to User PATH."
-} else {
-    Write-Host "$binDir already exists in User PATH."
-}
-```
-
-</details>
-
-</div>
-</dl>
+1. Navigate to https://github.com/jcbhmr/go-sea/releases.
+2. Choose the version you wish to install. That's probably the one marked "Latest".
+3. Download the platform-specific `.tar.gz` or `.zip` archive for your platform.
+4. If you're on Linux, macOS, WSL, or another \*nix-like operating system:
+    1. Make sure `~/.local/bin` exists to unpack to. You can create it using `mkdir -p ~/.local/bin`.
+    2. Make sure `~/.local/bin` is in your `PATH`. You can use `echo "$PATH"` to inspect your path. If it's not there, you can add it with `echo 'PATH="$PATH:$HOME/.local/bin"' >> ~/.bashrc` or something similar for your preferred shell.
+    3. Unpack the archive you just downloaded to `~/.local/bin`. You can do so using `tar -xzf *.tar.gz -C ~/.local/bin`.
+5. If you're on Windows:
+    1. Make sure `%LOCALAPPDATA%\Programs` exists to unpack to.
+    2. Make sure `%LOCALAPPDATA%\Programs` is in your `PATH`.
+    3. Unpack the archive you just downloaded to `%LOCALAPPDATA%\Programs`
 
 ## Usage
 
@@ -107,6 +68,7 @@ Use it like you would the official `go` binary!
 ## Development
 
 ```sh
+go generate ./...
 go build ./cmd/go
 go build cmd/gofmt
 ```
