@@ -8,7 +8,7 @@
 <tr valign=top><td>
 
 ```
-/usr/local/go
+~/go
 ├── api/
 │   └── ...
 ├── bin/
@@ -47,7 +47,14 @@
 </table>
 </div>
 
+📂 Self-extracts and caches the real Go installation files \
+🪄 Replaces itself with a symlink to the real cached `go` binary \
+😎 It's cool to be a single binary
+
 ## Installation
+
+![ZIP](https://img.shields.io/badge/ZIP-000000?style=for-the-badge)
+![tar](https://img.shields.io/badge/tar-000000?style=for-the-badge)
 
 1. Navigate to https://github.com/jcbhmr/go-sea/releases.
 2. Choose the version you wish to install. That's probably the one marked "Latest".
@@ -60,12 +67,22 @@
     1. Make sure `%LOCALAPPDATA%\Programs` exists to unpack to.
     2. Make sure `%LOCALAPPDATA%\Programs` is in your `PATH`.
     3. Unpack the archive you just downloaded to `%LOCALAPPDATA%\Programs`
+  
+<sup>TODO: Add install script? Contributions welcome! ❤️</sup>
+  
+You might also be looking for [the official Go installation guide](https://go.dev/doc/install) instead. 😉
 
 ## Usage
+
+![Linux](https://img.shields.io/badge/Linux-222222?style=for-the-badge&logo=Linux&logoColor=FCC624)
+![macOS](https://img.shields.io/badge/macOS-000000?style=for-the-badge&logo=macOS&logoColor=FFFFFF)
+![Windows](https://img.shields.io/badge/Windows-0078D6?style=for-the-badge)
 
 Use it like you would the official `go` binary!
 
 ## Development
+
+![Go](https://img.shields.io/badge/Go-00ADD8?style=for-the-badge&logo=Go&logoColor=FFFFFF)
 
 ```sh
 go generate ./...
