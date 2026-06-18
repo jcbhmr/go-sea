@@ -14,37 +14,31 @@ import (
 )
 
 func main() {
-	userCacheDir, err := os.UserCacheDir()
+	executable, err := os.Executable()
 	if err != nil {
-		panic(err)
+		log.Fatalf("os.Executable() err: %v", err)
 	}
-	cacheDir := filepath.Join(userCacheDir, "go-sea")
-
-	err = os.MkdirAll(cacheDir, 0o777)
+	executable, err = filepath.EvalSymlinks(executable)
 	if err != nil {
-		log.Fatalf("mkdir all path=%v perm=%o: %v", cacheDir, 0o777, err)
+		log.Fatalf("filepath.EvalSymlinks(%#v) err: %v", executable, err)
 	}
 
-	dir := filepath.Join(cacheDir, "go1.26.3")
+	dir := executable + ".UNPACKED"
+	// os.Mkdir is atomic on all systems.
 	err = os.Mkdir(dir, 0o777)
-	if err != nil {
-		if errors.Is(err, fs.ErrExist) {
-			// continue
-		} else {
-			log.Fatalf("mkdir path=%v perm=%o: %v", dir, 0o777, err)
-		}
-	} else {
-		err = os.CopyFS(dir, fsys)
+	if err == nil {
+		err := os.CopyFS(dir, fsys)
 		if err != nil {
-			log.Fatalf("copy fs dir=%v fsys=%v: %v", dir, fsys, err)
+			log.Fatalf("os.CopyFS(%#v, fsys) err: %v", dir, err)
 		}
+	} else if !errors.Is(err, fs.ErrExist) {
+		log.Fatalf("os.Mkdir(%#v, 0o777) err: %v", dir, err)
 	}
-
-	log.Printf("dir=%v", dir)
 
 	argv0 := filepath.Join(dir, "bin", "go")
 	if runtime.GOOS == "windows" {
 		argv0 += ".exe"
 	}
-	log.Fatal(crossexec.Exec(argv0, os.Args, os.Environ()))
+	err = crossexec.Exec(argv0, os.Args, os.Environ())
+	log.Fatalf("crossexec.Exec(%#v, os.Args, os.Environ()) err: %v", argv0, err)
 }
