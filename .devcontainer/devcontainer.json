@@ -1,3 +1,17 @@
 {
-  "image": "mcr.microsoft.com/devcontainers/go"
+  "image": "mcr.microsoft.com/devcontainers/go",
+  "updateContentCommand": {
+    "install-tinygo": "./.devcontainer/install-tinygo.bash"
+  },
+  "containerEnv": {
+    "GOROOT": "",
+    "GOTOOLCHAIN": ""
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "tinygo.vscode-tinygo"
+      ]
+    }
+  }
 }
