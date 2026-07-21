@@ -92,9 +92,15 @@ func main() {
 			log.Fatal(err)
 		}
 
+		if parent := filepath.Dir(appCacheDir); parent != appCacheDir {
+			err := os.MkdirAll(parent, 0o777)
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
 		err := os.Mkdir(appCacheDir, 0o777)
 		if err == nil {
-			err := copyOverwriteFS(appCacheDir, nil)
+			err := copyOverwriteFS(appCacheDir, os.DirFS("/usr/local/go"))
 			if err != nil {
 				os.RemoveAll(appCacheDir)
 				log.Fatal(err)
@@ -133,7 +139,7 @@ func main() {
 	}
 
 	runtime.LockOSThread()
-	signal.Ignore()
+	signal.Ignore(os.Interrupt)
 	err = cmd.Run()
 	if err != nil {
 		if _, ok := errors.AsType[*exec.ExitError](err); ok {
