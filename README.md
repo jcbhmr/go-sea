@@ -1,6 +1,6 @@
-# Go as a Single Executable Application
+# Go as a single executable application
 
-🚚 `go` and `gofmt` packaged as standalone bundled binaries
+🚚 `go` and `gofmt` as standalone binaries
 
 <div align=center>
 <table>
@@ -47,7 +47,6 @@
 </table>
 </div>
 
-📂 Self-extracts and caches the real Go installation files \
 😎 It's cool to be a single binary
 
 ## Installation
@@ -59,7 +58,7 @@
 
 You might also be looking for [the official Go installation guide](https://go.dev/doc/install) instead. 😉
 
-This module is not installable via `go get`/`go install`. If you could use `go get`/`go install` you'd already have Go installed! Instead, this project releases precompiled `.tar.gz` and `.zip` archives with the `go` and `gofmt` binaries in their root. These binaries are entirely standalone; for example, you could run `go fmt` without `gofmt` being present.
+This module is not installable via `go get`/`go install`. If you could use `go get`/`go install` you'd already have Go installed! Instead, this project releases precompiled `.tar.gz` and `.zip` archives with the `go` and `gofmt` binaries in their root. These binaries are entirely standalone; you can run `go fmt` without `gofmt` being present.
 
 1. Navigate to https://github.com/jcbhmr/go-sea/releases.
 2. Choose the version you wish to install. That's probably the one marked "Latest".

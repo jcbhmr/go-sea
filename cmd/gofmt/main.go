@@ -1,11 +1,19 @@
 //go:build (aix && ppc64) || (darwin && (amd64 || arm64)) || (dragonfly && amd64) || (freebsd && (386 || amd64 || arm || arm64)) || (illumos && amd64) || (linux && (386 || amd64 || arm64 || arm || loong64 || mips || mips64 || mips64le || mipsle || ppc64 || ppc64le || riscv64 || s390x)) || (netbsd && (386 || amd64 || arm || arm64)) || (openbsd && (386 || amd64 || arm || arm64 || ppc64 || riscv64)) || (plan9 && (386 || amd64 || arm)) || (solaris && amd64) || (windows && (386 || amd64 || arm64))
 
+/*
+go cache directory is ${cache}/go-sea/${version}/go/.
+gofmt cache directory is ${cache}/go-sea/${version}/gofmt/.
+
+	if go_cache_directory successfully unpacked:
+		exec ${go_cache_directory}/go-sea/${version}/go/bin/gofmt(.exe)
+	
+	unpack embedded gofmt to ${gofmt_cache_directory}
+*/
 package main
 
 import (
 	"context"
 	"errors"
-	"io"
 	"io/fs"
 	"log"
 	"os"
@@ -32,53 +40,6 @@ func pollStat(ctx context.Context, name string, d time.Duration) (fs.FileInfo, e
 	}
 }
 
-func copyOverlayFS(dir string, fsys fs.FS) error {
-	return fs.WalkDir(fsys, ".", func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-
-		fpath, err := filepath.Localize(path)
-		if err != nil {
-			return err
-		}
-		newPath := filepath.Join(dir, fpath)
-
-		switch d.Type() {
-		case fs.ModeDir:
-			return os.MkdirAll(newPath, 0777)
-		case fs.ModeSymlink:
-			target, err := fs.ReadLink(fsys, path)
-			if err != nil {
-				return err
-			}
-			return os.Symlink(target, newPath)
-		case 0:
-			r, err := fsys.Open(path)
-			if err != nil {
-				return err
-			}
-			defer r.Close()
-			info, err := r.Stat()
-			if err != nil {
-				return err
-			}
-			w, err := os.OpenFile(newPath, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0666|info.Mode()&0777)
-			if err != nil {
-				return err
-			}
-
-			if _, err := io.Copy(w, r); err != nil {
-				w.Close()
-				return &fs.PathError{Op: "Copy", Path: newPath, Err: err}
-			}
-			return w.Close()
-		default:
-			return &fs.PathError{Op: "CopyFS", Path: path, Err: fs.ErrInvalid}
-		}
-	})
-}
-
 func main() {
 	userCacheDir, err := os.UserCacheDir()
 	if err != nil {
@@ -99,7 +60,7 @@ func main() {
 		}
 		err := os.Mkdir(appCacheDir, 0o777)
 		if err == nil {
-			err := copyOverlayFS(appCacheDir, os.DirFS("/usr/local/go"))
+			err := copyOverwriteFS(appCacheDir, os.DirFS("/usr/local/go"))
 			if err != nil {
 				os.RemoveAll(appCacheDir)
 				log.Fatal(err)
