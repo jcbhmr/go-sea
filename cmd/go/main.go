@@ -3,149 +3,77 @@
 package main
 
 import (
-	"context"
+	"app/data"
+	"app/data/binfs"
+	"app/internal/crossexec"
 	"errors"
-	"io"
 	"io/fs"
 	"log"
 	"os"
-	"os/exec"
-	"os/signal"
 	"path/filepath"
 	"runtime"
-	"time"
+
+	"github.com/dschmidt/go-layerfs"
+	"github.com/josharian/filterfs"
+	"github.com/unstoppablemango/ihfs/prefixfs"
 )
 
-func pollStat(ctx context.Context, name string, d time.Duration) (fs.FileInfo, error) {
-	for {
-		info, err := os.Stat(name)
-		if err == nil {
-			return info, nil
-		} else if !errors.Is(err, fs.ErrNotExist) {
-			return nil, err
-		}
-		select {
-		case <-ctx.Done():
-			return nil, ctx.Err()
-		case <-time.After(d):
-		}
+var exeSuffix = func() string {
+	if runtime.GOOS == "windows" {
+		return ".exe"
+	} else {
+		return ""
 	}
-}
+}()
 
-func copyOverlayFS(dir string, fsys fs.FS) error {
-	return fs.WalkDir(fsys, ".", func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-
-		fpath, err := filepath.Localize(path)
-		if err != nil {
-			return err
-		}
-		newPath := filepath.Join(dir, fpath)
-
-		switch d.Type() {
-		case fs.ModeDir:
-			return os.MkdirAll(newPath, 0777)
-		case fs.ModeSymlink:
-			target, err := fs.ReadLink(fsys, path)
-			if err != nil {
-				return err
-			}
-			return os.Symlink(target, newPath)
-		case 0:
-			r, err := fsys.Open(path)
-			if err != nil {
-				return err
-			}
-			defer r.Close()
-			info, err := r.Stat()
-			if err != nil {
-				return err
-			}
-			w, err := os.OpenFile(newPath, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0666|info.Mode()&0777)
-			if err != nil {
-				return err
-			}
-
-			if _, err := io.Copy(w, r); err != nil {
-				w.Close()
-				return &fs.PathError{Op: "Copy", Path: newPath, Err: err}
-			}
-			return w.Close()
-		default:
-			return &fs.PathError{Op: "CopyFS", Path: path, Err: fs.ErrInvalid}
-		}
-	})
-}
+var GoFS = layerfs.New(
+	data.Assets,
+	prefixfs.New(filterfs.ExcludePaths(binfs.BinFS, "asm"+exeSuffix, "cgo"+exeSuffix, "compile"+exeSuffix, "cover"+exeSuffix, "fix"+exeSuffix, "link"+exeSuffix, "preprofile"+exeSuffix, "vet"+exeSuffix), "bin"),
+	prefixfs.New(filterfs.ExcludePaths(binfs.BinFS, "go"+exeSuffix, "gofmt"+exeSuffix), "pkg/tool/"+runtime.GOOS+"_"+runtime.GOARCH),
+)
 
 func main() {
+	var err error
+	defer func() {
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
+
 	userCacheDir, err := os.UserCacheDir()
 	if err != nil {
 		log.Fatal(err)
 	}
-	appCacheDir := filepath.Join(userCacheDir, "go-sea", "1.26.3")
+	appCacheDir := filepath.Join(userCacheDir, "go-sea", "1.26.5")
 
-	if _, err := os.Stat(filepath.Join(appCacheDir, ".unpacked-success")); err != nil {
-		if !errors.Is(err, fs.ErrNotExist) {
-			log.Fatal(err)
-		}
-
-		if parent := filepath.Dir(appCacheDir); parent != appCacheDir {
-			err := os.MkdirAll(parent, 0o777)
-			if err != nil {
-				log.Fatal(err)
-			}
-		}
-		err := os.Mkdir(appCacheDir, 0o777)
-		if err == nil {
-			err := copyOverlayFS(appCacheDir, os.DirFS("/usr/local/go"))
-			if err != nil {
-				os.RemoveAll(appCacheDir)
-				log.Fatal(err)
-			}
-		} else {
-			if !errors.Is(err, fs.ErrExist) {
-				log.Fatal(err)
-			}
-
-			func() {
-				ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-				defer cancel()
-				_, err := pollStat(ctx, filepath.Join(appCacheDir, ".unpacked-success"), 50*time.Millisecond)
-				if err != nil {
-					log.Fatal(err)
-				}
-			}()
-		}
-
-		err = os.WriteFile(filepath.Join(appCacheDir, ".unpacked-success"), nil, 0o666)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
-
-	var exeSuffix string
-	if runtime.GOOS == "windows" {
-		exeSuffix = ".exe"
-	}
-	cmd := &exec.Cmd{
-		Path:   filepath.Join(appCacheDir, "bin", "go"+exeSuffix),
-		Args:   os.Args,
-		Stdin:  os.Stdin,
-		Stdout: os.Stdout,
-		Stderr: os.Stderr,
-	}
-
-	runtime.LockOSThread()
-	signal.Ignore(os.Interrupt)
-	err = cmd.Run()
+	_, err = os.Stat(appCacheDir)
 	if err != nil {
-		if _, ok := errors.AsType[*exec.ExitError](err); ok {
-			// continue
+		if errors.Is(err, fs.ErrNotExist) {
+			err = nil
+
+			err = os.CopyFS(appCacheDir, GoFS)
+			if err != nil {
+				return
+			}
+			err = errors.Join(
+				os.Chmod(filepath.Join(appCacheDir, "bin/go"+exeSuffix), 0o777),
+				os.Chmod(filepath.Join(appCacheDir, "bin/gofmt"+exeSuffix), 0o777),
+				os.Chmod(filepath.Join(appCacheDir, "pkg/tool/"+runtime.GOOS+"_"+runtime.GOARCH+"/asm"+exeSuffix), 0o777),
+				os.Chmod(filepath.Join(appCacheDir, "pkg/tool/"+runtime.GOOS+"_"+runtime.GOARCH+"/cgo"+exeSuffix), 0o777),
+				os.Chmod(filepath.Join(appCacheDir, "pkg/tool/"+runtime.GOOS+"_"+runtime.GOARCH+"/compile"+exeSuffix), 0o777),
+				os.Chmod(filepath.Join(appCacheDir, "pkg/tool/"+runtime.GOOS+"_"+runtime.GOARCH+"/cover"+exeSuffix), 0o777),
+				os.Chmod(filepath.Join(appCacheDir, "pkg/tool/"+runtime.GOOS+"_"+runtime.GOARCH+"/fix"+exeSuffix), 0o777),
+				os.Chmod(filepath.Join(appCacheDir, "pkg/tool/"+runtime.GOOS+"_"+runtime.GOARCH+"/link"+exeSuffix), 0o777),
+				os.Chmod(filepath.Join(appCacheDir, "pkg/tool/"+runtime.GOOS+"_"+runtime.GOARCH+"/preprofile"+exeSuffix), 0o777),
+				os.Chmod(filepath.Join(appCacheDir, "pkg/tool/"+runtime.GOOS+"_"+runtime.GOARCH+"/vet"+exeSuffix), 0o777),
+			)
+			if err != nil {
+				return
+			}
 		} else {
-			log.Fatal(err)
+			return
 		}
 	}
-	os.Exit(cmd.ProcessState.ExitCode())
+
+	err = crossexec.Exec(filepath.Join(appCacheDir, "bin", "go"+exeSuffix), os.Args, os.Environ())
 }

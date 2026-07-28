@@ -36,3 +36,5 @@ go.work.sum
 /go
 /gofmt
 /go.*-*.zip
+/data/*-*/
+/data/assets.zip

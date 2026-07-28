@@ -88,8 +88,7 @@ Use it like you would the official `go` binary!
 
 ```sh
 go generate ./...
-go build ./cmd/go
-go build cmd/gofmt
+go build ./cmd/go ./cmd/gofmt
 ```
 
 ### How it works
